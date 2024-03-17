@@ -2,8 +2,7 @@
 
 ## Overview
 
-This directory contains the infrastructure code for the AKS cluster and the Azure resources that are used by the application. The infrastructure is defined using Terraform and the code is organized in a way that makes it easy to understand and maintain. It comprises the 
-following modules:
+This directory contains the infrastructure code for the AKS cluster and the Azure resources that are used by the application. The infrastructure is defined using Terraform and the code is organized in a way that makes it easy to understand and maintain. It comprises the following modules:
 
 - `rg`: This module is responsible for creating the resource group that contains the AKS cluster and the associated resources. In Azure, a resource group is a logical container that holds related resources, such as virtual machines, storage accounts, and databases, etc. This module creates a resource group with the specified name and location. And this module is used by the other modules to create the resources in the same resource group.
 
