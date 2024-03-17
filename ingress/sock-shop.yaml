@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: external-nginx
   rules:
-    - host: sock-shop.thequrtbuck.com.ng
+    - host: sockshop.qurtana.com.ng
       http:
         paths:
           - path: /
@@ -20,5 +20,5 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - sock-shop.thequrtbuck.com.ng
+        - sockshop.qurtana.com.ng
       secretName: production-cluster-issuer
