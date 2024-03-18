@@ -131,7 +131,7 @@ resource "local_file" "rsa-key" {
 
 resource "aws_instance" "ec2" {
   ami                     = data.aws_ami.ubuntu.id
-  instance_type           = "t2.2xlarge"
+  instance_type           = "t2.micro"
   key_name                = aws_key_pair.rsa-key.key_name
   subnet_id               = aws_subnet.subnet.id
   vpc_security_group_ids  = [aws_security_group.public-instance-sg.id]

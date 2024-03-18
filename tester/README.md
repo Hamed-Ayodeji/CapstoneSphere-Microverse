@@ -6,13 +6,13 @@ The Tester directory consists of a Terraform configuration file (`tester.tf`) an
 
 ### tester.tf
 
-The `tester.tf` file outlines the Terraform configuration for deploying an AWS EC2 instance of type `t2.2xlarge`. This instance is provisioned within a custom Virtual Private Cloud (VPC), equipped with necessary resources such as a dedicated security group.
+The `tester.tf` file outlines the Terraform configuration for deploying an AWS EC2 instance of type `t2.micro`. This instance is provisioned within a custom Virtual Private Cloud (VPC), equipped with necessary resources such as a dedicated security group.
 
 **Note:** This script assumes that you have the AWS CLI installed and configured with the necessary credentials. The default profile is used for the AWS CLI configuration. If you have a different profile name, you will need to modify the script accordingly.
 
 ### tester.sh
 
-The `tester.sh` script is a provisioning tool that runs on the EC2 instance post-deployment. This script sets up the software environment within the instance.
+The `tester.sh` script is a provisioning tool that runs on the EC2 instance post-deployment. This script sets up the software environment within the instance. The commands in the script are specific for an Ubuntu based EC2 instance. If you are using a different operating system, you will need to modify the script accordingly.
 
 ## Usage
 
