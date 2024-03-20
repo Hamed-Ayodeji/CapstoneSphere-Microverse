@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: kibana
-  namespace: monitoring
+  namespace: elk
   annotations:
     cert-manager.io/cluster-issuer: production
 spec:
