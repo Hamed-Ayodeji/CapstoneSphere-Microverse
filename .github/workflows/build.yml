@@ -136,4 +136,123 @@ jobs:
       - name: Wait for nginx-ingress to be ready
         run: sleep 30
 
-      
+      - name: Apply sock-shop YAML in ingress directory
+        run: |
+          cd ingress
+          attempt=1
+          until kubectl apply -f sock-shop.yml; do
+            if [ $attempt -eq 2 ]; then
+              echo "Failed to apply sock-shop YAML in ingress directory after 2 attempts"
+              exit 1
+            fi
+            echo "Retrying applying sock-shop YAML in ingress directory (attempt $attempt)"
+            sleep 10
+            ((attempt++))
+          done
+
+      - name: Wait for 10 seconds before applying Prometheus Stack YAMLs
+        run: sleep 10
+
+      - name: Apply Prometheus Stack CRDs
+        run: |
+          cd prometheus_stack/crds
+          attempt=1
+          until kubectl apply -f .; do
+            if [ $attempt -eq 2 ]; then
+              echo "Failed to apply Prometheus Stack CRDs after 2 attempts"
+              exit 1
+            fi
+            echo "Retrying applying Prometheus Stack CRDs (attempt $attempt)"
+            sleep 10
+            ((attempt++))
+          done
+
+      - name: Wait for 10 seconds before applying Prometheus Operator YAMLs
+        run: sleep 10
+
+      - name: Apply Prometheus Operator YAML
+        run: |
+          cd prometheus_stack/prometheus-operator
+          attempt=1
+          until kubectl apply -f .; do
+            if [ $attempt -eq 2 ]; then
+              echo "Failed to apply Prometheus Operator YAML after 2 attempts"
+              exit 1
+            fi
+            echo "Retrying applying Prometheus Operator YAML (attempt $attempt)"
+            sleep 10
+            ((attempt++))
+          done
+
+      - name: Wait for 10 seconds before applying Prometheus YAMLs
+        run: sleep 10
+
+      - name: Apply Prometheus YAML
+        run: |
+          cd prometheus_stack/prometheus
+          attempt=1
+          until kubectl apply -f .; do
+            if [ $attempt -eq 2 ]; then
+              echo "Failed to apply Prometheus YAML after 2 attempts"
+              exit 1
+            fi
+            echo "Retrying applying Prometheus YAML (attempt $attempt)"
+            sleep 10
+            ((attempt++))
+          done
+
+      - name: Wait for 10 seconds before applying Grafana YAMLs
+        run: sleep 10
+
+      - name: Apply Grafana YAML
+        run: |
+          cd prometheus_stack/grafana
+          attempt=1
+          until kubectl apply -f .; do
+            if [ $attempt -eq 2 ]; then
+              echo "Failed to apply Grafana YAML after 2 attempts"
+              exit 1
+            fi
+            echo "Retrying applying Grafana YAML (attempt $attempt)"
+            sleep 10
+            ((attempt++))
+          done
+
+      - name: Wait for 10 seconds before applying Alert Manager YAMLs
+        run: sleep 10
+
+      - name: Apply Alert Manager YAML
+        run: |
+          cd prometheus_stack/alertmanager
+          attempt=1
+          until kubectl apply -f .; do
+            if [ $attempt -eq 2 ]; then
+              echo "Failed to apply Alert Manager YAML after 2 attempts"
+              exit 1
+            fi
+            echo "Retrying applying Alert Manager YAML (attempt $attempt)"
+            sleep 10
+            ((attempt++))
+          done
+
+      - name: Wait for 10 seconds before applying ELK Stack YAMLs
+        run: sleep 10
+
+      - name: Apply namespace.yaml in elk_stack directory
+        run: |
+          cd elk_stack
+          kubectl apply -f namespace.yaml || kubectl apply -f namespace.yaml
+
+      - name: Apply other YAML files in elk_stack directory
+        run: |
+          cd elk_stack
+          attempt=1
+          until kubectl apply -f .; do
+            if [ $attempt -eq 2 ]; then
+              echo "Failed to apply YAML files in elk_stack directory after 2 attempts"
+              exit 1
+            fi
+            echo "Retrying applying YAML files in elk_stack directory (attempt $attempt)"
+            sleep 10
+            ((attempt++))
+          done
