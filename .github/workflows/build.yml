@@ -80,27 +80,60 @@ jobs:
       - name: Apply microservices YAML
         run: |
           cd microservices
-          kubectl apply -f . || kubectl apply -f .
+          attempt=1
+          until kubectl apply -f .; do
+            if [ $attempt -eq 2 ]; then
+              echo "Failed to apply microservices YAML after 2 attempts"
+              exit 1
+            fi
+            echo "Retrying applying microservices YAML (attempt $attempt)"
+            sleep 10
+            ((attempt++))
+          done
 
       - name: Apply letsencrypt YAML
         run: |
           cd letsencrypt
-          kubectl apply -f . || kubectl apply -f .
+          attempt=1
+          until kubectl apply -f .; do
+            if [ $attempt -eq 2 ]; then
+              echo "Failed to apply letsencrypt YAML after 2 attempts"
+              exit 1
+            fi
+            echo "Retrying applying letsencrypt YAML (attempt $attempt)"
+            sleep 10
+            ((attempt++))
+          done
 
       - name: Apply argocd YAML
         run: |
           cd argocd
-          kubectl apply -f . || kubectl apply -f .
+          attempt=1
+          until kubectl apply -f .; do
+            if [ $attempt -eq 2 ]; then
+              echo "Failed to apply argocd YAML after 2 attempts"
+              exit 1
+            fi
+            echo "Retrying applying argocd YAML (attempt $attempt)"
+            sleep 10
+            ((attempt++))
+          done
 
       - name: Apply nginx-ingress YAML
         run: |
           cd ingress
-          kubectl apply -f nginx-ingress.yml || kubectl apply -f nginx-ingress.yml
+          attempt=1
+          until kubectl apply -f nginx-ingress.yml; do
+            if [ $attempt -eq 2 ]; then
+              echo "Failed to apply nginx-ingress YAML after 2 attempts"
+              exit 1
+            fi
+            echo "Retrying applying nginx-ingress YAML (attempt $attempt)"
+            sleep 10
+            ((attempt++))
+          done
 
       - name: Wait for nginx-ingress to be ready
-        run: |
-          sleep 30
+        run: sleep 30
 
-      - name: Apply sock-shop YAML
-        run: |
-          kubectl apply -f sock-shop.yml || kubectl apply -f sock-shop.yml
+      
