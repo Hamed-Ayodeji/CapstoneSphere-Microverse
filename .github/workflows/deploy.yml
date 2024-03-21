@@ -56,7 +56,7 @@ jobs:
           terraform validate || { echo "Terraform validation failed"; exit 1; } && \
           if [ "${{ github.event.inputs.action }}" = "build" ]; then
             terraform plan -out=tfplan || { echo "Terraform planning failed"; exit 1; } && \
-            terraform apply tfplan || { echo "Terraform apply failed"; exit 1; } && \
+            terraform apply tfplan || { echo "Terraform apply failed"; exit 1; }
           elif [ "${{ github.event.inputs.action }}" = "cleanup" ]; then
             terraform destroy -auto-approve || { echo "Terraform destroy failed"; exit 1; }
           fi
@@ -75,7 +75,7 @@ jobs:
           terraform validate || { echo "Terraform validation failed"; exit 1; } && \
           if [ "${{ github.event.inputs.action }}" = "build" ]; then
             terraform plan -out=tfplan || { echo "Terraform planning failed"; exit 1; } && \
-            terraform apply tfplan || { echo "Terraform apply failed"; exit 1; } && \
+            terraform apply tfplan || { echo "Terraform apply failed"; exit 1; }
           elif [ "${{ github.event.inputs.action }}" = "cleanup" ]; then
             terraform destroy -auto-approve || { echo "Terraform destroy failed"; exit 1; }
           fi
