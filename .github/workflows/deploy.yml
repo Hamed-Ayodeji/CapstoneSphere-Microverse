@@ -49,10 +49,6 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Get AKS credentials
-        run: |
-          az aks get-credentials --resource-group capstonerg --name capstoneaks
-
       - name: Terraform setup and apply/destroy (infrastructure)
         run: |
           cd infrastructure && \
@@ -64,6 +60,13 @@ jobs:
           elif [ "${{ github.event.inputs.action }}" = "cleanup" ]; then
             terraform destroy -auto-approve || { echo "Terraform destroy failed"; exit 1; }
           fi
+
+      - name: Wait for k8s cluster to be ready
+        run: sleep 60
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials --resource-group capstonerg --name capstoneaks
 
       - name: Terraform setup and apply/destroy (helm_charts)
         run: |
