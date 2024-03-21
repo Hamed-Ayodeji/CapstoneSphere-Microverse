@@ -1,50 +1,68 @@
 name: Deploy Sockshop on AKS
-
-on:
+'on':
   workflow_dispatch:
     inputs:
       action:
-        description: 'Action to perform'
+        description: Action to perform
         required: true
-        default: 'build'
+        default: build
         options:
           - build
           - cleanup
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
       - name: Install Azure CLI
         uses: azure/CLI@v1
-
       - name: Install dependencies
-        run: |
+        run: >
           sudo apt-get update
+
           sudo apt-get install -y curl
-          curl -LO https://releases.hashicorp.com/terraform/$(curl -s https://releases.hashicorp.com/terraform/ | grep -oE 'terraform_[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail -n1)/terraform_$(curl -s https://releases.hashicorp.com/terraform/ | grep -oE 'terraform_[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail -n1)_linux_amd64.zip
+
+          curl -LO https://releases.hashicorp.com/terraform/$(curl -s
+          https://releases.hashicorp.com/terraform/ | grep -oE
+          'terraform_[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail
+          -n1)/terraform_$(curl -s https://releases.hashicorp.com/terraform/ |
+          grep -oE 'terraform_[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail
+          -n1)_linux_amd64.zip
+
           unzip terraform_*.zip
+
           sudo mv terraform /usr/local/bin/
-          sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-          curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-          sudo apt-add-repository "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+
+          sudo apt-get install -y apt-transport-https ca-certificates curl
+          software-properties-common
+
+          curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg |
+          sudo apt-key add -
+
+          sudo apt-add-repository "deb https://apt.kubernetes.io/
+          kubernetes-xenial main"
+
           sudo apt-get update
+
           sudo apt-get install -y kubectl
-          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+
+          curl -fsSL -o get_helm.sh
+          https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+
           chmod 700 get_helm.sh
+
           ./get_helm.sh
-
       - name: Login to Azure
-        run: az login --service-principal -u $(echo ${{ secrets.AZURE_CREDENTIALS }} | jq -r .clientId) -p $(echo ${{ secrets.AZURE_CREDENTIALS }} | jq -r .clientSecret) --tenant $(echo ${{ secrets.AZURE_CREDENTIALS }} | jq -r .tenantId)
-
+        run: >-
+          az login --service-principal -u $(echo ${{ secrets.AZURE_CREDENTIALS
+          }} | jq -r .clientId) -p $(echo ${{ secrets.AZURE_CREDENTIALS }} | jq
+          -r .clientSecret) --tenant $(echo ${{ secrets.AZURE_CREDENTIALS }} |
+          jq -r .tenantId)
       - name: Get Azure Subscription ID
         run: |
           SUBSCRIPTION_ID=$(az account show --query 'id' -o tsv)
           echo "::set-output name=subscription_id::$SUBSCRIPTION_ID"
-
       - name: Terraform setup and apply/destroy (infrastructure)
         run: |
           cd infrastructure
@@ -56,7 +74,6 @@ jobs:
           elif [ "${{ github.event.inputs.action }}" = "cleanup" ]; then
             terraform destroy -auto-approve || { echo "Terraform destroy failed"; exit 1; }
           fi
-
       - name: Terraform setup and apply/destroy (helm_charts)
         run: |
           cd helm_charts
@@ -68,15 +85,13 @@ jobs:
           elif [ "${{ github.event.inputs.action }}" = "cleanup" ]; then
             terraform destroy -auto-approve || { echo "Terraform destroy failed"; exit 1; }
           fi
-
       - name: Get AKS credentials
         id: get_credentials
         uses: azure/aks-get-credentials@v1
         with:
-          aks-subscription-id: ${{ steps.get_subscription_id.outputs.subscription_id }}
+            aks-subscription-id: '${{ steps.get_credentials.outputs.subscription_id }}'
           aks-resource-group: capstonerg
           aks-cluster-name: capstoneaks
-
       - name: Apply microservices YAML
         run: |
           cd microservices
@@ -90,7 +105,6 @@ jobs:
             sleep 10
             ((attempt++))
           done
-
       - name: Apply letsencrypt YAML
         run: |
           cd letsencrypt
@@ -104,7 +118,6 @@ jobs:
             sleep 10
             ((attempt++))
           done
-
       - name: Apply argocd YAML
         run: |
           cd argocd
@@ -118,7 +131,6 @@ jobs:
             sleep 10
             ((attempt++))
           done
-
       - name: Apply nginx-ingress YAML
         run: |
           cd ingress
@@ -132,10 +144,8 @@ jobs:
             sleep 10
             ((attempt++))
           done
-
       - name: Wait for nginx-ingress to be ready
         run: sleep 30
-
       - name: Apply sock-shop YAML in ingress directory
         run: |
           cd ingress
@@ -149,10 +159,8 @@ jobs:
             sleep 10
             ((attempt++))
           done
-
       - name: Wait for 10 seconds before applying Prometheus Stack YAMLs
         run: sleep 10
-
       - name: Apply Prometheus Stack CRDs
         run: |
           cd prometheus_stack/crds
@@ -166,10 +174,8 @@ jobs:
             sleep 10
             ((attempt++))
           done
-
       - name: Wait for 10 seconds before applying Prometheus Operator YAMLs
         run: sleep 10
-
       - name: Apply Prometheus Operator YAML
         run: |
           cd prometheus_stack/prometheus-operator
@@ -183,10 +189,8 @@ jobs:
             sleep 10
             ((attempt++))
           done
-
       - name: Wait for 10 seconds before applying Prometheus YAMLs
         run: sleep 10
-
       - name: Apply Prometheus YAML
         run: |
           cd prometheus_stack/prometheus
@@ -200,10 +204,8 @@ jobs:
             sleep 10
             ((attempt++))
           done
-
       - name: Wait for 10 seconds before applying Grafana YAMLs
         run: sleep 10
-
       - name: Apply Grafana YAML
         run: |
           cd prometheus_stack/grafana
@@ -217,10 +219,8 @@ jobs:
             sleep 10
             ((attempt++))
           done
-
       - name: Wait for 10 seconds before applying Alert Manager YAMLs
         run: sleep 10
-
       - name: Apply Alert Manager YAML
         run: |
           cd prometheus_stack/alertmanager
@@ -234,15 +234,12 @@ jobs:
             sleep 10
             ((attempt++))
           done
-
       - name: Wait for 10 seconds before applying ELK Stack YAMLs
         run: sleep 10
-
       - name: Apply namespace.yaml in elk_stack directory
         run: |
           cd elk_stack
           kubectl apply -f namespace.yaml || kubectl apply -f namespace.yaml
-
       - name: Apply other YAML files in elk_stack directory
         run: |
           cd elk_stack
