@@ -22,39 +22,36 @@ jobs:
       - name: Install Azure CLI
         uses: pietrobolcato/install-azure-cli-action@v1.0.1
 
-      - name: Install curl
+      - name: Install necessary tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl
+          sudo apt-get install -y curl unzip wget apt-transport-https gnupg2 software-properties-common git ca-certificates
 
       - name: Install Terraform
         run: |
-          curl -LO https://releases.hashicorp.com/terraform/$(curl -s https://releases.hashicorp.com/terraform/ | grep -oE 'terraform_[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail -n1)/terraform_$(curl -s https://releases.hashicorp.com/terraform/ | grep -oE 'terraform_[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail -n1)_linux_amd64.zip
-          unzip terraform_*.zip
-          sudo mv terraform /usr/local/bin/
+          sudo wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          sudo echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+          sudo apt update && sudo apt install terraform
 
       - name: Install kubectl
         run: |
-          sudo apt-get install -y apt-transport-https ca-certificates software-properties-common
-          curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-          sudo apt-add-repository "deb https://apt.kubernetes.io/kubernetes-xenial main"
-          sudo apt-get update
-          sudo apt-get install -y kubectl
+          sudo snap install kubectl --classic
 
       - name: Install Helm
         run: |
-          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
-          chmod 700 get_helm.sh
-          ./get_helm.sh
+          curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | tee /usr/share/keyrings/helm.gpg > /dev/null
+          sudo apt-get install apt-transport-https --yes
+          sudo echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | tee /etc/apt/sources.list.d/helm-stable-debian.list
+          sudo apt-get update
+          sudo apt-get install helm
 
       - name: Login to Azure
         run: >-
           az login --service-principal -u $(echo ${{ secrets.AZURE_CREDENTIALS }} | jq -r .clientId) -p $(echo ${{ secrets.AZURE_CREDENTIALS }} | jq -r .clientSecret) --tenant $(echo ${{ secrets.AZURE_CREDENTIALS }} | jq -r .tenantId)
 
-      - name: Get Azure Subscription ID
+      - name: Get AKS credentials
         run: |
-          SUBSCRIPTION_ID=$(az account show --query 'id' -o tsv)
-          echo "::set-output name=subscription_id::$SUBSCRIPTION_ID"
+          az aks get-credentials --resource-group capstonerg --name capstoneaks
 
       - name: Terraform setup and apply/destroy (infrastructure)
         run: |
