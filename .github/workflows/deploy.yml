@@ -21,9 +21,6 @@ jobs:
 
       - name: Install Azure CLI
         uses: azure/CLI@v1
-        with:
-          inlineScript: |
-            curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
       - name: Install dependencies
         run: |
