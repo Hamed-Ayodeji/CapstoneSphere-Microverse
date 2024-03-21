@@ -86,4 +86,14 @@ The architecture of the project is as follows:
 
 10. Then it starts to deploy the various components to the AKS cluster such as the Helm charts, the microservices, the NGINX Ingress controller, the Prometheus stack, the ELK stack, and the Let's Encrypt SSL certificates.
 
-![Architecture](.img/architecture.png)
+![Architecture](.img/capstone.jpg)
+
+## Contributing
+
+Contributions are welcome. You can contribute to this project by forking this repository, making changes, and submitting a pull request. For major changes, please open an issue first to discuss what you would like to change.
+
+## Conclusion
+
+This project is a demonstration of how to use GitHub Actions to deploy an AKS cluster to Azure, deploy a microservice application, and deploy monitoring and logging tools to the AKS cluster. The project also demonstrates how to use Let's Encrypt to provide SSL certificates for the microservice application.
+
+The project is a good starting point for anyone who wants to learn how to deploy applications to Kubernetes and how to set up monitoring and logging tools for the applications.
