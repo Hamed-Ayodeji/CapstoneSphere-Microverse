@@ -1,6 +1,106 @@
-name: Deploy microservice application and other tools
+name: Deploy Sockshop on AKS
+
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'build'
+        options:
+          - build
+          - cleanup
+
 jobs:
-  build:  # Authenticate with Azure cli
+  deploy:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Azure CLI
+        uses: azure/CLI@v1
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+          curl -LO https://releases.hashicorp.com/terraform/$(curl -s https://releases.hashicorp.com/terraform/ | grep -oE 'terraform_[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail -n1)/terraform_$(curl -s https://releases.hashicorp.com/terraform/ | grep -oE 'terraform_[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail -n1)_linux_amd64.zip
+          unzip terraform_*.zip
+          sudo mv terraform /usr/local/bin/
+          sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+          curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+          sudo apt-add-repository "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+          sudo apt-get update
+          sudo apt-get install -y kubectl
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+          chmod 700 get_helm.sh
+          ./get_helm.sh
+
+      - name: Login to Azure
+        run: az login --service-principal -u $(echo ${{ secrets.AZURE_CREDENTIALS }} | jq -r .clientId) -p $(echo ${{ secrets.AZURE_CREDENTIALS }} | jq -r .clientSecret) --tenant $(echo ${{ secrets.AZURE_CREDENTIALS }} | jq -r .tenantId)
+
+      - name: Get Azure Subscription ID
+        run: |
+          SUBSCRIPTION_ID=$(az account show --query 'id' -o tsv)
+          echo "::set-output name=subscription_id::$SUBSCRIPTION_ID"
+
+      - name: Terraform setup and apply/destroy (infrastructure)
+        run: |
+          cd infrastructure
+          terraform init || { echo "Terraform initialization failed"; exit 1; }
+          terraform validate || { echo "Terraform validation failed"; exit 1; }
+          if [ "${{ github.event.inputs.action }}" = "build" ]; then
+            terraform plan -out=tfplan || { echo "Terraform planning failed"; exit 1; }
+            terraform apply tfplan || { echo "Terraform apply failed"; exit 1; }
+          elif [ "${{ github.event.inputs.action }}" = "cleanup" ]; then
+            terraform destroy -auto-approve || { echo "Terraform destroy failed"; exit 1; }
+          fi
+
+      - name: Terraform setup and apply/destroy (helm_charts)
+        run: |
+          cd helm_charts
+          terraform init || { echo "Terraform initialization failed"; exit 1; }
+          terraform validate || { echo "Terraform validation failed"; exit 1; }
+          if [ "${{ github.event.inputs.action }}" = "build" ]; then
+            terraform plan -out=tfplan || { echo "Terraform planning failed"; exit 1; }
+            terraform apply tfplan || { echo "Terraform apply failed"; exit 1; }
+          elif [ "${{ github.event.inputs.action }}" = "cleanup" ]; then
+            terraform destroy -auto-approve || { echo "Terraform destroy failed"; exit 1; }
+          fi
+
+      - name: Get AKS credentials
+        id: get_credentials
+        uses: azure/aks-get-credentials@v1
+        with:
+          aks-subscription-id: ${{ steps.get_subscription_id.outputs.subscription_id }}
+          aks-resource-group: capstonerg
+          aks-cluster-name: capstoneaks
+
+      - name: Apply microservices YAML
+        run: |
+          cd microservices
+          kubectl apply -f . || kubectl apply -f .
+
+      - name: Apply letsencrypt YAML
+        run: |
+          cd letsencrypt
+          kubectl apply -f . || kubectl apply -f .
+
+      - name: Apply argocd YAML
+        run: |
+          cd argocd
+          kubectl apply -f . || kubectl apply -f .
+
+      - name: Apply nginx-ingress YAML
+        run: |
+          cd ingress
+          kubectl apply -f nginx-ingress.yml || kubectl apply -f nginx-ingress.yml
+
+      - name: Wait for nginx-ingress to be ready
+        run: |
+          sleep 30
+
+      - name: Apply sock-shop YAML
+        run: |
+          kubectl apply -f sock-shop.yml || kubectl apply -f sock-shop.yml
