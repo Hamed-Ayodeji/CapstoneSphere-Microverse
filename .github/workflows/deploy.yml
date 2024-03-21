@@ -283,6 +283,7 @@ jobs:
         run: |
           if [ -d "helm_charts" ]; then
             cd helm_charts && \
+            terraform init || { echo "Terraform initialization failed"; exit 1; } && \
             terraform destroy -auto-approve || { echo "Terraform destroy failed"; exit 1; }
           else
             echo "The 'helm_charts' directory does not exist."
@@ -291,6 +292,7 @@ jobs:
 
           if [ -d "infrastructure" ]; then
             cd infrastructure && \
+            terraform init || { echo "Terraform initialization failed"; exit 1; } && \
             terraform destroy -auto-approve || { echo "Terraform destroy failed"; exit 1; }
           else
             echo "The 'infrastructure' directory does not exist."
