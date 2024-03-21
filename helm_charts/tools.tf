@@ -17,4 +17,9 @@ resource "helm_release" "argocd" {
   chart            = "argo-cd"
   namespace        = "argocd"
   create_namespace = true
+
+  set {
+    name           = "installCRDs"
+    value          = "true"
+  }
 }
