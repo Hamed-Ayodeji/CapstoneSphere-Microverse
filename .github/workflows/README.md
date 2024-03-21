@@ -1,6 +1,6 @@
-# Deploy Sockshop on Azure Kubernetes Service (AKS) Workflow
+# Deploy Sock-shop on Azure Kubernetes Service (AKS) Workflow
 
-This GitHub Actions workflow file automates the deployment of Sockshop, a microservices-based demo application, onto Azure Kubernetes Service (AKS). The workflow allows for both building and cleaning up the deployment environment based on user input.
+This GitHub Actions workflow file automates the deployment of Sock-shop, a microservices-based demo application, onto Azure Kubernetes Service (AKS). The workflow allows for both building and cleaning up the deployment environment based on user input.
 
 ## Overview of GitHub Actions
 
@@ -10,7 +10,7 @@ GitHub Actions is a feature of GitHub that enables continuous integration (CI) a
 
 ### Workflow Trigger
 
-This workflow is triggered manually using the `workflow_dispatch` event, allowing users to choose between two actions: `build` and `cleanup`. The `build` action deploys the Sockshop application, while the `cleanup` action removes the deployed resources.
+This workflow is triggered manually using the `workflow_dispatch` event, allowing users to choose between two actions: `build` and `cleanup`. The `build` action deploys the Sock-shop application, while the `cleanup` action removes the deployed resources.
 
 ### Permissions
 
@@ -58,7 +58,7 @@ The workflow consists of two main jobs:
 
 15. **Wait for NGINX Ingress to be Ready**: Adds a delay to ensure NGINX Ingress is ready before proceeding.
 
-16. **Apply Sock-shop YAML in Ingress Directory**: Applies YAML files for deploying Sockshop.
+16. **Apply Sock-shop YAML in Ingress Directory**: Applies YAML files for deploying Sock-shop.
 
 17. **Apply Prometheus Stack YAMLs**: Applies YAML files for deploying Prometheus stack components.
 
@@ -76,12 +76,30 @@ The workflow consists of two main jobs:
 
 To apply this workflow configuration:
 
-1. Copy the provided YAML code and save it as `deploy.yml` in your GitHub repository's `.github/workflows` directory.
+1. Create a new GitHub repository or use an existing one.
 
-2. Make sure you have the necessary permissions to perform the actions defined in the workflow.
+2. Make sure you have all the files and directories required for the deployment in your repository.
 
-3. Trigger the workflow manually by navigating to the Actions tab in your GitHub repository, selecting the workflow, and choosing the desired action (build or cleanup) from the dropdown menu.
+3. Go to the "Actions" tab in your repository and click on "Set up a workflow yourself" to create a new workflow file.
 
-4. Monitor the workflow execution for any errors or failures.
+4. Copy the contents of the `deploy.yml` file from this repository and paste it into the new workflow file.
 
-By following these steps, you can effectively deploy and manage the Sockshop application on Azure Kubernetes Service using GitHub Actions.
+5. Trigger the workflow manually by navigating to the Actions tab in your GitHub repository, selecting the workflow, and choosing the desired action (build or cleanup) from the dropdown menu.
+
+6. Monitor the workflow execution for any errors or failures.
+
+By following these steps, you can effectively deploy and manage the Sock-shop application on Azure Kubernetes Service using GitHub Actions.
+
+## Screenshots
+
+### Workflow Dispatch with Build Action
+
+![Workflow Dispatch with Build Action](.img/workflowbuildaction.png)
+
+![Workflow Dispatch with Build Action](.img/job.png)
+
+![Workflow Dispatch with Build Action](.img/steps.png)
+
+### Workflow Dispatch with Cleanup Action
+
+![Workflow Dispatch with Cleanup Action](.img/workflowcleanupaction.png)

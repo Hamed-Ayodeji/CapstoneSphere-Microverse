@@ -24,7 +24,9 @@ This directory contains the infrastructure code for the AKS cluster and the Azur
 
 - The terraform state is stored in an Azure Storage Account. This is to ensure that the state is durable and can be shared across the team. The state is stored in a blob container in the storage account. The state is also locked to prevent concurrent modifications. This is to ensure that the state is not corrupted. This storage account will be used across every terraform script within this project.
 
-- An Azure DNS zone has also been created to provide a domain name for the AKS cluster. This is to ensure that the AKS cluster can be accessed using a domain name. The DNS zone is used to map the domain name to the public IP address of the AKS cluster. This DNS zone will be used across every terraform script within this project. This was done before hand to ensure that the DNS zone is available when the AKS cluster is created. The Nameservers of the DNS zone are also used to configure the domain name in the domain registrar. This is to ensure that the domain name can be resolved to the public IP address of the AKS cluster.
+<!-- - An Azure DNS zone has also been created to provide a domain name for the AKS cluster. This is to ensure that the AKS cluster can be accessed using a domain name. The DNS zone is used to map the domain name to the public IP address of the AKS cluster. This DNS zone will be used across every terraform script within this project. This was done before hand to ensure that the DNS zone is available when the AKS cluster is created. The Nameservers of the DNS zone are also used to configure the domain name in the domain registrar. This is to ensure that the domain name can be resolved to the public IP address of the AKS cluster. -->
+
+- A Domain name has been purchased from a domain registrar, in this case I used [Qserver](https://www.qservers.net/). This domain name will be used to access the AKS cluster. The domain name is used to map the domain name to the public IP address of the AKS cluster Nginx ingress controller. A record will be set for all the subdomains of the domain name to point to the public IP address of the AKS cluster Nginx ingress controller. This will be done after the Nginx ingress controller is deployed to the AKS cluster.
 
 ## Testing
 
@@ -42,6 +44,8 @@ This directory contains the infrastructure code for the AKS cluster and the Azur
 - After running the above commands, you should see the infrastructure being created in the Azure portal. You should see the resource group, the virtual network, the subnets, and the AKS cluster being created. You should also see the state being stored in the Azure Storage Account. Here is a screenshot of the infrastructure created in the Azure portal after running the above commands:
 
   ![Infrastructure](.img/infrastructure.png)
+
+  **Note**: I eventually decided to use my DNS provider for the DNS zone and the domain name. I have also set the necessary records for the domain name to point to the public IP address of the AKS cluster Nginx ingress controller. [Qserver](https://www.qservers.net/) has a very fast propagation time for DNS records.
 
 - To test the AkS cluster, you can run the following commands:
 
