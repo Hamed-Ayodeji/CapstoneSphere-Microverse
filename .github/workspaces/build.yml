@@ -1,0 +1,6 @@
+name: Deploy microservice application and other tools
+on:
+  workflow_dispatch: {}
+jobs:
+  build:  # Authenticate with Azure cli
+    runs-on: ubuntu-latest
