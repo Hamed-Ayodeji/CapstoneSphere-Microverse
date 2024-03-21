@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install Azure CLI
-        uses: azure/CLI@v1
+        uses: pietrobolcato/install-azure-cli-action@v1.0.1
 
       - name: Install dependencies
         run: |
